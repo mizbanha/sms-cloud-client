@@ -1,0 +1,59 @@
+{
+    "name": "mizbanha/sms-cloud-client",
+    "description": "Optional, fail-open telemetry client that reports mizbanha/laravel-sms operational metrics to Mizbanha SMS Cloud. Never on the sending path.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "sms", "telemetry", "observability", "mizbanha"],
+    "homepage": "https://mizbanha.com",
+    "support": {
+        "issues": "https://github.com/mizbanha/sms-cloud-client/issues",
+        "source": "https://github.com/mizbanha/sms-cloud-client"
+    },
+    "authors": [
+        {
+            "name": "Amid Esfahani",
+            "homepage": "https://github.com/amidesfahani"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/console": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/database": "^13.0",
+        "illuminate/http": "^13.0",
+        "illuminate/queue": "^13.0",
+        "illuminate/support": "^13.0",
+        "mizbanha/laravel-sms": "^0.1.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mizbanha\\SmsCloud\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mizbanha\\SmsCloud\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mizbanha\\SmsCloud\\SmsCloudServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "repositories": {
+    }
+}
