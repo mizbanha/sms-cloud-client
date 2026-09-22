@@ -1,0 +1,54 @@
+name: tests
+
+# ⚠️ No secret is needed and none is used. The suite fakes every network call:
+# the SMS providers and SMS Cloud both answer through Http::fake(), and nothing
+# here can send an SMS or reach a real Cloud.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, pdo_sqlite
+          coverage: none
+
+      # Validated BEFORE the step below edits it: what is published must be a
+      # manifest with no local path repository in it.
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      # Until mizbanha/laravel-sms v0.1.1 (the release carrying the events this
+      # package listens to) is published, the suite resolves Core from its own
+      # repository. Delete these two steps once it is on Packagist.
+      - name: Check out Core
+        uses: actions/checkout@v4
+        with:
+          repository: mizbanha/laravel-sms
+          ref: main
+          path: .core
+
+      - name: Install dependencies against that checkout
+        run: ./scripts/use-local-core.sh ./.core
+
+      - name: Run the test suite
+        run: vendor/bin/pest
