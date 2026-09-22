@@ -71,16 +71,11 @@ jobs:
       # Until mizbanha/laravel-sms v0.1.1 (the release carrying the events this
       # package listens to) is published, the suite resolves Core from its own
       # repository. Delete these two steps once it is on Packagist.
-      #
-      # ⚠ The ref is the unmerged branch, not main, and must be: the four
-      # events this package listens to do not exist on main yet. Pointing this at
-      # main resolves a Core without src/Events and fifteen tests fail on
-      # missing classes. Move it to main the moment the branch lands.
       - name: Check out Core
         uses: actions/checkout@v4
         with:
           repository: mizbanha/laravel-sms
-          ref: feat/observability-events
+          ref: main
           path: .core
 
       - name: Install dependencies against that checkout
