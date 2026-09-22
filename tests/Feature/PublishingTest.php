@@ -118,8 +118,10 @@ it('backs off exponentially and caps the delay', function () {
         $this->travelTo($next->addSecond());
     }
 
-    expect($delays[0])->toBeGreaterThanOrEqual(30)->toBeLessThan(40)
-        ->and($delays[1])->toBeGreaterThanOrEqual(60)
+    // ≥29 rather than ≥30: `next_attempt_at` is a whole-second column, so a delay
+    // measured from a sub-second "now" reads up to a second short.
+    expect($delays[0])->toBeGreaterThanOrEqual(29)->toBeLessThan(40)
+        ->and($delays[1])->toBeGreaterThanOrEqual(59)
         ->and(max($delays))->toBeLessThanOrEqual(1800 * 1.2 + 1);
 });
 

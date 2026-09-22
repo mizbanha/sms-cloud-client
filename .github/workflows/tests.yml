@@ -14,13 +14,44 @@ permissions:
 
 jobs:
   test:
-    name: PHP ${{ matrix.php }}
+    name: PHP ${{ matrix.php }} · ${{ matrix.database }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         php: ['8.3', '8.4']
+        # The outbox lives in the CUSTOMER's database, so the suite runs on the
+        # engines customers actually have — not only SQLite.
+        database: [sqlite, mysql, pgsql]
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: sms_cloud_client_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd "mysqladmin ping -psecret"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: sms_cloud_client_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      SMS_CLOUD_TEST_DB: ${{ matrix.database == 'sqlite' && '' || matrix.database }}
+      SMS_CLOUD_TEST_DB_HOST: 127.0.0.1
+      SMS_CLOUD_TEST_DB_PORT: ${{ matrix.database == 'mysql' && '3306' || '5432' }}
+      SMS_CLOUD_TEST_DB_USERNAME: ${{ matrix.database == 'mysql' && 'root' || 'postgres' }}
+      SMS_CLOUD_TEST_DB_PASSWORD: secret
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +60,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, intl, pdo_sqlite
+          extensions: mbstring, intl, pdo_sqlite, pdo_mysql, pdo_pgsql
           coverage: none
 
       # Validated BEFORE the step below edits it: what is published must be a

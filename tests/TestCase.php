@@ -36,7 +36,7 @@ abstract class TestCase extends Orchestra
         $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
         $app['config']->set('app.env', 'production');
         $app['config']->set('database.default', 'testing');
-        $app['config']->set('database.connections.testing', ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => '']);
+        $app['config']->set('database.connections.testing', $this->testConnection());
         $app['config']->set('cache.default', 'array');
         $app['config']->set('laravel-sms.enabled', true);
 
@@ -49,6 +49,55 @@ abstract class TestCase extends Orchestra
     {
         $this->loadMigrationsFrom(__DIR__.'/../vendor/mizbanha/laravel-sms/database/migrations');
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+    }
+
+    /**
+     * The database this run uses.
+     *
+     * ⚠️ SQLite in memory by default, but the outbox lives in the CUSTOMER's
+     * database — which is usually MySQL or PostgreSQL. The same suite runs
+     * against a disposable server of either engine so the local buffer is
+     * exercised where it will actually run:
+     *
+     *     SMS_CLOUD_TEST_DB=mysql SMS_CLOUD_TEST_DB_PORT=13306 vendor/bin/pest
+     *     SMS_CLOUD_TEST_DB=pgsql SMS_CLOUD_TEST_DB_PORT=15432 vendor/bin/pest
+     *
+     * @return array<string, mixed>
+     */
+    protected function testConnection(): array
+    {
+        $engine = env('SMS_CLOUD_TEST_DB');
+
+        if ($engine === 'mysql') {
+            return [
+                'driver' => 'mysql',
+                'host' => env('SMS_CLOUD_TEST_DB_HOST', '127.0.0.1'),
+                'port' => env('SMS_CLOUD_TEST_DB_PORT', '3306'),
+                'database' => env('SMS_CLOUD_TEST_DB_DATABASE', 'sms_cloud_client_test'),
+                'username' => env('SMS_CLOUD_TEST_DB_USERNAME', 'root'),
+                'password' => env('SMS_CLOUD_TEST_DB_PASSWORD', ''),
+                'charset' => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+                'prefix' => '',
+                'strict' => true,
+            ];
+        }
+
+        if ($engine === 'pgsql') {
+            return [
+                'driver' => 'pgsql',
+                'host' => env('SMS_CLOUD_TEST_DB_HOST', '127.0.0.1'),
+                'port' => env('SMS_CLOUD_TEST_DB_PORT', '5432'),
+                'database' => env('SMS_CLOUD_TEST_DB_DATABASE', 'sms_cloud_client_test'),
+                'username' => env('SMS_CLOUD_TEST_DB_USERNAME', 'postgres'),
+                'password' => env('SMS_CLOUD_TEST_DB_PASSWORD', ''),
+                'charset' => 'utf8',
+                'prefix' => '',
+                'search_path' => 'public',
+            ];
+        }
+
+        return ['driver' => 'sqlite', 'database' => ':memory:', 'prefix' => ''];
     }
 
     /**

@@ -104,6 +104,10 @@ your memory without bound.
 
 PHP 8.3+ · Laravel 13 · `mizbanha/laravel-sms` ^0.1.1
 
+The outbox is two ordinary tables on your default connection (or another one, if
+you set `sms-cloud.buffer.connection`). The suite runs against SQLite, MySQL 8.4
+and PostgreSQL 17, because that is where it will actually live.
+
 ## Tests
 
 ```bash

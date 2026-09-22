@@ -127,6 +127,13 @@ it('gives each event to exactly one batch when two aggregators race', function (
 
     // A second aggregator deletes one of "our" events between our select and our
     // delete. The count check must notice and roll the whole run back.
+    //
+    // Driven with a SQLite trigger, so this case runs on the default engine; the
+    // guard it proves (delete count must equal select count) is engine-independent.
+    if (DB::connection()->getDriverName() !== 'sqlite') {
+        test()->markTestSkipped('the injected race uses a SQLite trigger');
+    }
+
     DB::statement("CREATE TRIGGER steal AFTER INSERT ON sms_cloud_batches BEGIN DELETE FROM sms_cloud_events WHERE id = (SELECT MIN(id) FROM sms_cloud_events); END");
 
     expect(fn () => app(Outbox::class)->aggregate(CarbonImmutable::parse('2026-09-19 10:40:00', 'UTC')))

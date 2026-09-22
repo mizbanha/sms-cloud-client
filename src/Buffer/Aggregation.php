@@ -36,9 +36,7 @@ final class Aggregation
                 continue;
             }
 
-            // Databases return `2026-09-19 10:36:12.345`; the protocol wants
-            // RFC 3339, so the separator becomes a T here, once.
-            $occurred = str_replace(' ', 'T', (string) $event->occurred_at);
+            $occurred = self::rfc3339((string) $event->occurred_at);
             $minute = substr($occurred, 0, 16);
 
             match ($event->type) {
@@ -208,7 +206,7 @@ final class Aggregation
     private function circuit(string $minute, string $occurred, array $payload): void
     {
         $this->transitions[$minute][] = [
-            'at' => substr($occurred, 0, 23).'Z',
+            'at' => $occurred.'Z',
             'gateway' => (string) ($payload['gateway'] ?? 'unknown'),
             'driver' => (string) ($payload['driver'] ?? 'unknown'),
             'from' => (string) ($payload['from'] ?? 'closed'),
@@ -236,6 +234,26 @@ final class Aggregation
         if (in_array($status, ['delivered', 'failed', 'sent', 'unknown'], true)) {
             $row['delivery'][$status]++;
         }
+    }
+
+    /**
+     * `2026-09-19 10:36:12.345` → `2026-09-19T10:36:12.345`.
+     *
+     * ⚠️ The fraction is normalised to exactly three digits because engines
+     * disagree: PostgreSQL trims trailing zeros (`.25`), MySQL and SQLite keep
+     * them (`.250`), and a timestamp on the wire should not depend on which
+     * database the customer happens to run.
+     */
+    private static function rfc3339(string $stored): string
+    {
+        $value = str_replace(' ', 'T', trim($stored));
+        $dot = strpos($value, '.');
+
+        if ($dot === false) {
+            return substr($value, 0, 19).'.000';
+        }
+
+        return substr($value, 0, 19).'.'.str_pad(substr(substr($value, $dot + 1), 0, 3), 3, '0');
     }
 
     /** @return array<string, mixed> */
