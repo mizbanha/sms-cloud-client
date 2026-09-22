@@ -18,8 +18,8 @@ function manifest(): array
 it('declares no development repository override in what it publishes', function () {
     /*
      * `scripts/use-local-core.sh` adds a path repository so the suite can run
-     * against an unreleased Core, so the WORKING manifest legitimately has one
-     * while tests run. What must never carry it is the COMMITTED manifest: a
+     * against an unreleased Core, so the WORKING manifest may legitimately have
+     * one while tests run. What must never carry it is the COMMITTED manifest: a
      * consumer installing this package would resolve `mizbanha/laravel-sms` from
      * a folder that does not exist on their machine.
      */

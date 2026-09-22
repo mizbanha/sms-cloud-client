@@ -111,8 +111,13 @@ and PostgreSQL 17, because that is where it will actually live.
 ## Tests
 
 ```bash
-./scripts/use-local-core.sh ../laravel-sms   # only while Core is unreleased
+composer update
 vendor/bin/pest
 ```
+
+Core comes from Packagist like any other dependency, which is what CI does too.
+To work against an unreleased Core instead, `./scripts/use-local-core.sh
+../laravel-sms` points the manifest at a local checkout — for development only;
+that override must never be committed, and a test enforces it.
 
 MIT. © Mizbanha — deliberately open, so anyone can audit what leaves their server.
