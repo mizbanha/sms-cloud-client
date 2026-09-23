@@ -6,7 +6,12 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-First release. Nothing has been tagged yet.
+Nothing yet.
+
+## [0.1.0] - 2026-09-23
+
+First release. Requires `mizbanha/laravel-sms` ^0.1.1, the release that
+announces the four events this package listens to.
 
 ### Added
 
@@ -33,3 +38,6 @@ First release. Nothing has been tagged yet.
 - ⚠️ **Everything is bounded**: memory, outbox rows, batch count, batch age,
   backoff and per-run time. Past a limit the oldest telemetry is dropped and
   counted, and the counts are reported in the next heartbeat.
+
+[Unreleased]: https://github.com/mizbanha/sms-cloud-client/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/mizbanha/sms-cloud-client/releases/tag/v0.1.0
